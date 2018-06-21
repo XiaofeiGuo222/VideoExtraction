@@ -1,0 +1,39 @@
+					MPEG Developing Classes
+
+Copyright (C) 1998, Intelligent Information Engineering Laboratory, Department of
+Computer Science and Engineering, Oakland University, All Rights Reserved; 
+
+					Disclaimer of Warranty
+
+
+MPEG Developing Classes, both binary and source (hereafter, Software)
+is copyrighted by Intelligent Information Engineering Laboratory, Department of
+Computer Science and Engineering, Oakland University(OU), 
+and ownership remains with OU.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files to use, copy,
+and distribute the software, provided that no charge is associated with 
+such copies and that the copyright notice and this statement appears on 
+all copies.
+
+THE SOFTWARE IS AVAILABLE TO THE USER ON AN "AS IS" BASIS, WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE 
+IMPLIED WARRANTIES OR MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+IN NO EVENT SHALL THE COPYRIGHT-HOLDER BE LIABLE FOR ANY CLAIMS, DAMAGES, OR
+OTHER LIABILITIES OF ANY KIND WHATSOEVER ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. THIS 
+DISCLAIMAER OF WARRANTY EXTENDS TO THE USER OF THIS SOFTWARE. ALSO THE WSU 
+DOES NOT REPRESENT OR WARRANT THAT THE SOFTWARE FURNISHED HEREUNDER ARE FREE OF
+INFRINGMENT OF ANY THIRD-PARTY PATENTS.
+
+Many patents of MPEG-1 and MPEG-2 are general enough such that commercial
+implementations, including shareware, are unavoidable subject to royalty fees to
+patent holders, regardless of implementation design.
+
+
+Intelligent Information Engineering Laboratory,
+Department of Computer Science and Engineering,
+Oakland University,
+Rochester, MI 48202.
+Dongge Li(dongge.li@philips.com) and Ishwar K. Sethi(isethi@oakland.edu).
