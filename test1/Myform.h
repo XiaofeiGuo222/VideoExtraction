@@ -206,7 +206,7 @@ namespace face
 			//还原一个y block
 			assignValues(C, j, VB);
 			//取平均数存在buffer里
-			pYBuff2[j] = (BYTE)getBlockAverage(VB);
+			pYBuff2[j] = (BYTE)getBlockAverage(VB) + 128;
 		}
 
 		//CbDCT block
@@ -214,7 +214,7 @@ namespace face
 		for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
 		{
 			assignValues(C, j, VB);
-			pCbBuff2[j] = (BYTE)getBlockAverage(VB);
+			pCbBuff2[j] = (BYTE)getBlockAverage(VB) + 128;
 
 		}
 
@@ -222,7 +222,7 @@ namespace face
 		for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
 		{
 			assignValues(C, j, VB);
-			pCrBuff2[j] = (BYTE)getBlockAverage(VB);
+			pCrBuff2[j] = (BYTE)getBlockAverage(VB) + 128;
 		}
 		conv.YV12_to_RGB24(pYBuff2, pCbBuff2, pCrBuff2, pRGBBuff2, wYPicWidth * 2, wYPicHeight * 2);
 
