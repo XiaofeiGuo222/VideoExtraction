@@ -3,6 +3,8 @@
 #include <tchar.h>
 #include <dshow.h>
 #include "include\convert.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #using <mscorlib.dll> 
 #using <System.Drawing.dll>
@@ -49,6 +51,7 @@ namespace face
 	private: System::Windows::Forms::PictureBox ^  pictureBox1;
 	private: System::Windows::Forms::PictureBox ^  pictureBox2;
 	private: System::Windows::Forms::PictureBox ^  pictureBox3;
+	private: System::Windows::Forms::PictureBox ^  pictureBox4;
 	private: System::Windows::Forms::Button ^  startButton;
 	private: System::Windows::Forms::OpenFileDialog ^  openFileDialog;
 
@@ -64,8 +67,11 @@ namespace face
 			pictureBox2->Location = Point(606, 16);
 			pictureBox2->Size = System::Drawing::Size(90, 90);
 			this->pictureBox3 = (gcnew System::Windows::Forms::PictureBox());
-			pictureBox3->Location = Point(266, 120);
+			pictureBox3->Location = Point(100, 120);
 			pictureBox3->Size = System::Drawing::Size(400, 400);
+			this->pictureBox4 = (gcnew System::Windows::Forms::PictureBox());
+			pictureBox4->Location = Point(600, 120);
+			pictureBox4->Size = System::Drawing::Size(400, 400);
 
 
 			//file dialog
@@ -82,6 +88,7 @@ namespace face
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->pictureBox2);
 			this->Controls->Add(this->pictureBox3);
+			this->Controls->Add(this->pictureBox4);
 			this->Controls->Add(this->startButton);
 
 			this->AutoScaleBaseSize = System::Drawing::Size(8, 19);
@@ -139,83 +146,6 @@ namespace face
 
 				if (type1 == I_TYPE)
 				{
-
-					///////////////////////////////////////////////////////
-
-					//原大小重构
-					System::Drawing::Bitmap^ bitmap3 = gcnew System::Drawing::Bitmap((int)PicWidth, (int)PicHeight,
-						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-					System::Drawing::Rectangle^ rect3 = gcnew System::Drawing::Rectangle(0, 0, (int)PicWidth, (int)PicHeight);
-
-					System::Drawing::Imaging::BitmapData^ bmData3 = bitmap3->LockBits(
-						*rect3,
-						System::Drawing::Imaging::ImageLockMode::ReadWrite,
-						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-
-					int m_stride = bmData3->Stride;
-					int m_scan0 = bmData3->Scan0.ToInt32();
-					BYTE* pc = (BYTE*)(void*)m_scan0;
-
-					BYTE* pYBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 4];
-					BYTE* pCbBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
-					BYTE* pCrBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
-					BYTE* pRGBBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 12];
-					ColorSpaceConversions conv;
-
-
-					DCTBLOCK * Y = pCompressedPic->pshYDCTBlock;
-					for (int j = 0; j < wYPicWidth*wYPicHeight * 4; j++)
-					{
-						int x = (j % (wYPicWidth * 2)) * 8;
-						int y = (j / (wYPicWidth * 2)) * 8;
-						assignPixels(pYBuff3, x, y, PicWidth, Y, j);
-						//pYBuff3[j] = (BYTE)(pCompressedPic->pshYDCTBlock[j][0] >> 3) + 128;
-					}
-
-					DCTBLOCK * Cb = pCompressedPic->pshCbDCTBlock;
-					DCTBLOCK * Cr = pCompressedPic->pshCrDCTBlock;
-					for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
-					{
-						int x = (j % wYPicWidth) * 8;
-						int y = (j / wYPicWidth) * 8;
-						assignPixels(pCbBuff3, x, y, PicWidth / 2, Cb, j);
-						assignPixels(pCrBuff3, x, y, PicWidth / 2, Cr, j);
-	/*					pCbBuff3[j] = (BYTE)(pCompressedPic->pshCbDCTBlock[j][0] >> 3) + 128;
-						pCrBuff3[j] = (BYTE)(pCompressedPic->pshCrDCTBlock[j][0] >> 3) + 128;*/
-					}
-
-					conv.YV12_to_RGB24(pYBuff3, pCbBuff3, pCrBuff3, pRGBBuff3, wYPicWidth * 16, wYPicHeight * 16);
-
-					BYTE* qc = pRGBBuff3 + wYPicWidth * 8 * 6 * (wYPicHeight * 8 * 2 - 1);
-
-					for (int j = 0; j < wYPicHeight * 8 * 2; j++)
-					{
-						for (int k = 0; k < wYPicWidth* 8 * 2; k++)
-						{
-							pc[0] = qc[k * 3];
-							pc[1] = qc[k * 3 + 1];
-							pc[2] = qc[k * 3 + 2];
-							pc = pc + 3;
-
-						}
-						qc = qc - wYPicWidth * 8 * 6;
-					}
-
-					bitmap3->UnlockBits(bmData3);
-
-					this->pictureBox3->Image = bitmap3;
-					this->pictureBox3->Update();
-
-					delete [] pYBuff3;
-					delete [] pCbBuff3;
-					delete [] pCrBuff3;
-					delete [] pRGBBuff3;
-
-
-					//////////////////////////////////////////////////////////////////////
-
-
-
 					//重构缩略图
 					System::Drawing::Bitmap^ bitmap1 = gcnew System::Drawing::Bitmap((int)(wYPicWidth * 2), (int)(wYPicHeight * 2),
 						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
@@ -228,8 +158,8 @@ namespace face
 
 
 
-					m_stride = bmData->Stride;
-					m_scan0 = bmData->Scan0.ToInt32();
+					int m_stride = bmData->Stride;
+					int m_scan0 = bmData->Scan0.ToInt32();
 
 					BYTE* p = (BYTE*)(void*)m_scan0;
 
@@ -237,7 +167,7 @@ namespace face
 					BYTE* pCbBuff = new BYTE[wYPicWidth*wYPicHeight];
 					BYTE* pCrBuff = new BYTE[wYPicWidth*wYPicHeight];
 					BYTE* pRGBBuff = new BYTE[wYPicWidth*wYPicHeight * 12];
-					//ColorSpaceConversions conv;
+					ColorSpaceConversions conv;
 
 					for (int j = 0; j < wYPicWidth*wYPicHeight * 4; j++)
 					{
@@ -279,8 +209,7 @@ namespace face
 					delete [] pCrBuff;
 					delete [] pRGBBuff;
 
-					//尝试抽取9个系数重构
-					//失败
+					//抽取9个系数重构缩略图
 					System::Drawing::Bitmap^ bitmap2 = gcnew System::Drawing::Bitmap((int)(wYPicWidth * 2), (int)(wYPicHeight * 2),
 						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
 					System::Drawing::Imaging::BitmapData^ bmData2 = bitmap2->LockBits(
@@ -298,7 +227,7 @@ namespace face
 					BYTE* pCrBuff2 = new BYTE[wYPicWidth*wYPicHeight];
 					BYTE* pRGBBuff2 = new BYTE[wYPicWidth*wYPicHeight * 12];
 
-					Y = pCompressedPic->pshYDCTBlock;
+					DCTBLOCK* Y = pCompressedPic->pshYDCTBlock;
 
 					ValueBlocks VB;
 
@@ -311,7 +240,7 @@ namespace face
 					}
 
 					//CbDCT block
-					Cb = pCompressedPic->pshCbDCTBlock;
+					DCTBLOCK* Cb = pCompressedPic->pshCbDCTBlock;
 					for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
 					{
 						assignValues(Cb, j, VB);
@@ -319,7 +248,7 @@ namespace face
 
 					}
 
-					Cr = pCompressedPic->pshCrDCTBlock;
+					DCTBLOCK* Cr = pCompressedPic->pshCrDCTBlock;
 					for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
 					{
 						assignValues(Cr, j, VB);
@@ -352,6 +281,135 @@ namespace face
 					delete [] pCbBuff2;
 					delete [] pCrBuff2;
 					delete [] pRGBBuff2;
+
+					//原大小重构
+					System::Drawing::Bitmap^ bitmap3 = gcnew System::Drawing::Bitmap((int)PicWidth, (int)PicHeight,
+						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+					System::Drawing::Rectangle^ rect3 = gcnew System::Drawing::Rectangle(0, 0, (int)PicWidth, (int)PicHeight);
+
+					System::Drawing::Imaging::BitmapData^ bmData3 = bitmap3->LockBits(
+						*rect3,
+						System::Drawing::Imaging::ImageLockMode::ReadWrite,
+						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+
+					m_stride = bmData3->Stride;
+					m_scan0 = bmData3->Scan0.ToInt32();
+					BYTE* pc = (BYTE*)(void*)m_scan0;
+
+					BYTE* pYBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 4];
+					BYTE* pCbBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
+					BYTE* pCrBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
+					BYTE* pRGBBuff3 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 12];
+
+					Y = pCompressedPic->pshYDCTBlock;
+					for (int j = 0; j < wYPicWidth*wYPicHeight * 4; j++)
+					{
+						int x = (j % (wYPicWidth * 2)) * 8;
+						int y = (j / (wYPicWidth * 2)) * 8;
+						assignPixels(pYBuff3, x, y, PicWidth, Y, j);
+					}
+
+					Cb = pCompressedPic->pshCbDCTBlock;
+					Cr = pCompressedPic->pshCrDCTBlock;
+					for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
+					{
+						int x = (j % wYPicWidth) * 8;
+						int y = (j / wYPicWidth) * 8;
+						assignPixels(pCbBuff3, x, y, PicWidth / 2, Cb, j);
+						assignPixels(pCrBuff3, x, y, PicWidth / 2, Cr, j);
+					}
+
+					conv.YV12_to_RGB24(pYBuff3, pCbBuff3, pCrBuff3, pRGBBuff3, wYPicWidth * 16, wYPicHeight * 16);
+
+					BYTE* qc = pRGBBuff3 + wYPicWidth * 8 * 6 * (wYPicHeight * 8 * 2 - 1);
+
+					for (int j = 0; j < wYPicHeight * 8 * 2; j++)
+					{
+						for (int k = 0; k < wYPicWidth * 8 * 2; k++)
+						{
+							pc[0] = qc[k * 3];
+							pc[1] = qc[k * 3 + 1];
+							pc[2] = qc[k * 3 + 2];
+							pc = pc + 3;
+
+						}
+						qc = qc - wYPicWidth * 8 * 6;
+					}
+
+					bitmap3->UnlockBits(bmData3);
+
+					this->pictureBox3->Image = bitmap3;
+					this->pictureBox3->Update();
+
+					delete[] pYBuff3;
+					delete[] pCbBuff3;
+					delete[] pCrBuff3;
+					delete[] pRGBBuff3;
+
+					//原大小抽取9个系数
+					System::Drawing::Bitmap^ bitmap4 = gcnew System::Drawing::Bitmap((int)PicWidth, (int)PicHeight,
+						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+					System::Drawing::Rectangle^ rect4 = gcnew System::Drawing::Rectangle(0, 0, (int)PicWidth, (int)PicHeight);
+
+					System::Drawing::Imaging::BitmapData^ bmData4 = bitmap4->LockBits(
+						*rect3,
+						System::Drawing::Imaging::ImageLockMode::ReadWrite,
+						System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+
+					m_stride = bmData4->Stride;
+					m_scan0 = bmData4->Scan0.ToInt32();
+					BYTE* pc2 = (BYTE*)(void*)m_scan0;
+
+					BYTE* pYBuff4 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 4];
+					BYTE* pCbBuff4 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
+					BYTE* pCrBuff4 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8];
+					BYTE* pRGBBuff4 = new BYTE[wYPicWidth * 8 * wYPicHeight * 8 * 12];
+
+					Y = pCompressedPic->pshYDCTBlock;
+					for (int j = 0; j < wYPicWidth*wYPicHeight * 4; j++)
+					{
+						int x = (j % (wYPicWidth * 2)) * 8;
+						int y = (j / (wYPicWidth * 2)) * 8;
+						assign4m4Pixels(pYBuff4, x, y, PicWidth, Y, j);
+					}
+
+					Cb = pCompressedPic->pshCbDCTBlock;
+					Cr = pCompressedPic->pshCrDCTBlock;
+					for (int j = 0; j < wYPicWidth*wYPicHeight; j++)
+					{
+						int x = (j % wYPicWidth) * 8;
+						int y = (j / wYPicWidth) * 8;
+						assign4m4Pixels(pCbBuff4, x, y, PicWidth / 2, Cb, j);
+						assign4m4Pixels(pCrBuff4, x, y, PicWidth / 2, Cr, j);
+					}
+
+					conv.YV12_to_RGB24(pYBuff4, pCbBuff4, pCrBuff4, pRGBBuff4, wYPicWidth * 16, wYPicHeight * 16);
+
+					BYTE* qc2 = pRGBBuff4 + wYPicWidth * 8 * 6 * (wYPicHeight * 8 * 2 - 1);
+
+					for (int j = 0; j < wYPicHeight * 8 * 2; j++)
+					{
+						for (int k = 0; k < wYPicWidth * 8 * 2; k++)
+						{
+							pc2[0] = qc2[k * 3];
+							pc2[1] = qc2[k * 3 + 1];
+							pc2[2] = qc2[k * 3 + 2];
+							pc2 = pc2 + 3;
+
+						}
+						qc2 = qc2 - wYPicWidth * 8 * 6;
+					}
+
+					bitmap4->UnlockBits(bmData4);
+
+					this->pictureBox4->Image = bitmap4;
+					this->pictureBox4->Update();
+
+					delete[] pYBuff4;
+					delete[] pCbBuff4;
+					delete[] pCrBuff4;
+					delete[] pRGBBuff4;
+
 				}
 				if (MpvDecoder.MoveToNextFrame() != MDC_SUCCESS) {
 					return;
@@ -361,6 +419,36 @@ namespace face
 			MpvDecoder.FreeCompressedPic();
 		}
 
+		int IDCT(int x, int y, DCTBLOCK * C, int blocknum)
+		{
+			double alphau, alphav;
+			double ret = 0;
+			double temp = 0;
+			for (int u = 0; u <= 7; u++)
+			{
+				for (int v = 0; v <= 7; v++)
+				{
+					if (u == 0)
+						alphau = 1 / sqrt(2);
+					else
+						alphau = 1;
+
+					if (v == 0)
+						alphav = 1 / sqrt(2);
+					else
+						alphav = 1;
+					int a = C[blocknum][u + 8 * v];
+					temp += alphau * alphav * C[blocknum][u + 8 * v] * 
+							cos(((2 * x + 1) * u * M_PI) / 16) * cos(((2 * y + 1) * v * M_PI) / 16);
+
+				}
+			}
+			ret = temp / 4;
+			
+			return round(ret);
+		}
+
+
 		void assignPixels(Byte * pbuff, int x, int y, int num_per_row, DCTBLOCK * C, int blocknum)
 		{
 			int index = 0;
@@ -369,11 +457,116 @@ namespace face
 				for (int j = 0; j < 8; j++)
 				{
 					index = x + j + (y + i) * num_per_row;
-					pbuff[index] = (BYTE)(C[blocknum][0] >> 3) + 128;
+					pbuff[index] = IDCT(x + j, (y + i) * num_per_row, C, blocknum) + 128;
+				}
+			}	
+		}
+
+
+		void assign4m4Pixels(Byte * pbuff, int x, int y, int num_per_row, DCTBLOCK * C, int blocknum)
+		{
+			int index = 0;
+			ABBlocks AB;
+			assignBlock(C, AB, blocknum);
+			for (int i = 0; i < 8; i++)
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					index = x + j + (y + i) * num_per_row;
+					switch (i)
+					{
+					case 0:
+					case 1:
+						switch (j)
+						{
+						case 0:
+						case 1: //x00
+							pbuff[index] = ((AB.A1 + AB.A3) >> 3) + ((AB.B3 + AB.B1 + AB.C11) >> 3) + ((AB.B3 + AB.B1 + AB.C11) >> 5) + 128;
+							break;
+						case 2:
+						case 3: //x10
+							pbuff[index] = ((AB.A2 + AB.A4) >> 3) + (AB.B2 >> 3) + (AB.B2 >> 5) + (AB.B3 >> 4) + (AB.C11 >> 4) + 128;
+							break;
+						case 4:
+						case 5: //x20
+							pbuff[index] = ((AB.A2 + AB.A4) >> 3) + (AB.B2 >> 3) + (AB.B2 >> 5) - (AB.B3 >> 4) - (AB.C11 >> 4) + 128;
+							break;
+						case 6:
+						case 7: //x30
+							pbuff[index] = ((AB.A1 + AB.A3) >> 3) - ((AB.B3 - AB.B1) >> 4) - (AB.C11 >> 4) + 128;
+							break;
+						}
+						break;
+					case 2:
+					case 3:
+						switch (j)
+						{
+						case 0:
+						case 1: //x01
+							pbuff[index] = ((AB.A1 - AB.A3) >> 3) + (AB.B3 >> 3) + (AB.B3 >> 5) + (AB.B1 >> 4) + (AB.C11 >> 4) + 128;
+							break;
+						case 2:
+						case 3: //x11
+							pbuff[index] = ((AB.A2 - AB.A4) >> 3) + ((AB.B4 + AB.B2) >> 4) + 128;
+							break;
+						case 4:
+						case 5: //x21
+							pbuff[index] = ((AB.A2 - AB.A4) >> 3) - ((AB.B4 - AB.B2) >> 4) + 128;
+							break;
+						case 6:
+						case 7: //x31
+							pbuff[index] = ((AB.A1 - AB.A3) >> 3) - (AB.B4 >> 3) - (AB.B4 >> 5) + (AB.B1 >> 4) + (AB.C11 >> 4) + 128;
+						}
+						break;
+					case 4:
+					case 5:
+						switch (j)
+						{
+						case 0:
+						case 1: //x02
+							pbuff[index] = ((AB.A1 - AB.A3) >> 3) + (AB.B4 >> 3) + (AB.B4 >> 5) - (AB.B1 >> 4) - (AB.C11 >> 4) + 128;
+							break;
+						case 2:
+						case 3: //x12
+							pbuff[index] = ((AB.A2 - AB.A4) >> 3) + (AB.B4 >> 4) - (AB.B2 >> 4) + 128;
+							break;
+						case 4:
+						case 5: //x22
+							pbuff[index] = ((AB.A2 - AB.A4) >> 3) - ((AB.B4 + AB.B2) >> 4) + 128;
+							break;
+						case 6:
+						case 7: //x32
+							pbuff[index] = ((AB.A1 - AB.A3) >> 3) - (AB.B4 >> 3) - (AB.B4 >> 5) - (AB.B1 >> 4) + (AB.C11 >> 4) + 128;
+						}
+						break;
+					case 6:
+					case 7:
+						switch (j)
+						{
+						case 0:
+						case 1: //x03
+							pbuff[index] = ((AB.A1 + AB.A3) >> 3) + ((AB.B4 - AB.B1 - AB.C11) >> 3) + ((AB.B4 - AB.B1 - AB.C11) >> 5) + 128;
+							break;
+						case 2:
+						case 3: //x13
+							pbuff[index] = ((AB.A2 + AB.A4) >> 3) - (AB.B2 >> 3) - (AB.B2 >> 5) + (AB.B3 >> 4) - (AB.C11 >> 4) + 128;
+							break;
+						case 4:
+						case 5: //x23
+							pbuff[index] = ((AB.A2 + AB.A4) >> 3) - (AB.B2 >> 3) - (AB.B2 >> 5) - (AB.B3 >> 4) + (AB.C11 >> 4) + 128;
+							break;
+						case 6:
+						case 7: //x33
+							pbuff[index] = ((AB.A1 + AB.A3) >> 3) - ((AB.B4 + AB.B1 - AB.C11) >> 3) - ((AB.B4 + AB.B1 - AB.C11) >> 5) + 128;
+						}
+						break;
+					}
 				}
 			}
-			
+
 		}
+
+
 
 		void assignValues(DCTBLOCK * C, int j, ValueBlocks& VB) {
 			ABBlocks AB;
