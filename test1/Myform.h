@@ -157,8 +157,8 @@ namespace face
 			pCompressedPic = MpvDecoder.PrepareCompressedPic();
 			MpvDecoder.GetMaxFrameNum(&lastnum);
 
-			for (int i = 0; i < (int)(lastnum - 1); i++)
-			{
+			//for (int i = 0; i < (int)(lastnum - 1); i++)
+			//{
 				lResult = MpvDecoder.GetCompressedPic();
 				pMpvHeaderData = MpvDecoder.GetMpvHeaders();
 				Byte type1 = pMpvHeaderData->PictureHeader.nPictureCodingType;
@@ -255,9 +255,10 @@ namespace face
 					{
 						int x = (j % (wYPicWidth * 2)) * 8;
 						int y = (j / (wYPicWidth * 2)) * 8;
-						assign4m4Pixels(pYBuff, x, y, PicWidth, Y, j);
-						//assign2m2Pixels(pYBuff4, x, y, PicWidth, Y, j);
-						//assign4m4_16DctPixels(pYBuff4, x, y, PicWidth, Y, j);
+						//printf("Y block %d: \n", j);
+						//assign4m4Pixels(pYBuff, x, y, PicWidth, Y, j);
+						//assign2m2Pixels(pYBuff, x, y, PicWidth, Y, j);
+						assign4m4_16DctPixels(pYBuff, x, y, PicWidth, Y, j);
 					}
 
 					DCTBLOCK* Cb = pCompressedPic->pshCbDCTBlock;
@@ -266,12 +267,14 @@ namespace face
 					{
 						int x = (j % wYPicWidth) * 8;
 						int y = (j / wYPicWidth) * 8;
-						assign4m4Pixels(pCbBuff, x, y, PicWidth / 2, Cb, j);
-						assign4m4Pixels(pCrBuff, x, y, PicWidth / 2, Cr, j);
-						//assign2m2Pixels(pCbBuff4, x, y, PicWidth / 2, Cb, j);
-						//assign2m2Pixels(pCrBuff4, x, y, PicWidth / 2, Cr, j);
-						//assign4m4_16DctPixels(pCbBuff4, x, y, PicWidth / 2, Cb, j);
-						//assign4m4_16DctPixels(pCrBuff4, x, y, PicWidth / 2, Cr, j);
+						//printf("Cb block %d: \n", j);
+						//assign4m4Pixels(pCbBuff, x, y, PicWidth / 2, Cb, j);
+						//printf("Cr block %d: \n", j);
+						//assign4m4Pixels(pCrBuff, x, y, PicWidth / 2, Cr, j);
+						//assign2m2Pixels(pCbBuff, x, y, PicWidth / 2, Cb, j);
+						//assign2m2Pixels(pCrBuff, x, y, PicWidth / 2, Cr, j);
+						assign4m4_16DctPixels(pCbBuff, x, y, PicWidth / 2, Cb, j);
+						assign4m4_16DctPixels(pCrBuff, x, y, PicWidth / 2, Cr, j);
 					}
 					ColorSpaceConversions conv;
 					conv.YV12_to_RGB24(pYBuff, pCbBuff, pCrBuff, pRGBBuff, wYPicWidth * 16, wYPicHeight * 16);
@@ -304,7 +307,7 @@ namespace face
 				}
 				if (MpvDecoder.MoveToNextFrame() != MDC_SUCCESS) {
 					return;
-				}
+				//}
 			}
 
 			MpvDecoder.FreeCompressedPic();
@@ -736,7 +739,7 @@ namespace face
 		{
 			int index = 0;
 			ValueBlocks VB;
-			assignValues(C, blocknum, VB);
+			assign4m4_9Values(C, blocknum, VB);
 			for (int i = 0; i < 8; i++)
 			{
 				for (int j = 0; j < 8; j++)
@@ -838,7 +841,8 @@ namespace face
 		void assign4m4_16DctPixels(Byte * pbuff, int x, int y, int num_per_row, DCTBLOCK * C, int blocknum) {
 			int index = 0;
 			ValueBlocks VB;
-			assignValues(C, blocknum, VB);
+			assign4m4_9Values(C, blocknum, VB);
+			assign4m4_7Values(C, blocknum, VB);
 			//short temp[64];
 			for (int i = 0; i < 8; i++)
 			{
@@ -854,20 +858,20 @@ namespace face
 						{
 						case 0:
 						case 1: //x00
-							pbuff[index] = (Byte)(VB.x00 + (C[blocknum][24] + C[blocknum][26] + C[blocknum][3] + C[blocknum][19] + C[blocknum][27]) >> 4 + (C[blocknum][25] + C[blocknum][1]) >> 3 + 128);
-							//temp[i * 8 + j] = (C[blocknum][24] + C[blocknum][26] + C[blocknum][3] + C[blocknum][19] + C[blocknum][27]) >> 4 + (C[blocknum][25] + C[blocknum][1]) >> 3 + 128;
+							pbuff[index] = (VB.x00 + 128);
+							//temp[i * 8 + j] = (C[j][24] + C[j][26] + C[j][3] + C[j][19] + C[j][27]) >> 4 + (C[j][25] + C[j][1]) >> 3 + 128;
 							break;
 						case 2:
 						case 3: //x10
-							pbuff[index] = (Byte)(VB.x10 - (C[blocknum][24] + C[blocknum][26]) >> 3 + (C[blocknum][3] - C[blocknum][19]) >> 4 - C[blocknum][25] >> 2 + C[blocknum][11] >> 5 - C[blocknum][27] >> 3 + 128);
+							pbuff[index] = (VB.x10 + 128);
 							break;
 						case 4:
 						case 5: //x20
-							pbuff[index] = (Byte)(VB.x20 + (C[blocknum][24] + C[blocknum][26]) >> 3 + (C[blocknum][3] - C[blocknum][19]) >> 4 + C[blocknum][25] >> 2 - C[blocknum][11] >> 5 + C[blocknum][27] >> 3 + 128);
+							pbuff[index] = (VB.x20 + 128);
 							break;
 						case 6:
 						case 7: //x30
-							pbuff[index] = (Byte)(VB.x30 - (C[blocknum][24] - C[blocknum][26] + C[blocknum][3] + C[blocknum][19] - C[blocknum][27]) >> 4 + (C[blocknum][25] + C[blocknum][1]) >> 3 + 128);
+							pbuff[index] = (VB.x30 + 128);
 							break;
 						}
 						break;
@@ -877,19 +881,19 @@ namespace face
 						{
 						case 0:
 						case 1: //x01
-							pbuff[index] = (Byte)(VB.x01 + (C[blocknum][24] - C[blocknum][26]) >> 4 - (C[blocknum][3] + C[blocknum][19]) >> 3 + C[blocknum][25] >> 5 - C[blocknum][11] >> 2 + C[blocknum][27] >> 3 + 128);
+							pbuff[index] = (VB.x01 + 128);
 							break;
 						case 2:
 						case 3: //x11
-							pbuff[index] = (Byte)(VB.x11 - (C[blocknum][24] - C[blocknum][26]) >> 3 - (C[blocknum][3] - C[blocknum][19]) >> 3 - (C[blocknum][25] + C[blocknum][11]) >> 4 + C[blocknum][27] >> 2 + 128);
+							pbuff[index] = (VB.x11 + 128);
 							break;
 						case 4:
 						case 5: //x21
-							pbuff[index] = (Byte)(VB.x21 + (C[blocknum][24] - C[blocknum][26]) >> 3 - (C[blocknum][3] - C[blocknum][19]) >> 3 + (C[blocknum][25] + C[blocknum][11]) >> 4 - C[blocknum][27] >> 2 + 128);
+							pbuff[index] = (VB.x21 + 128);
 							break;
 						case 6:
 						case 7: //x31
-							pbuff[index] = (Byte)(VB.x31 - (C[blocknum][24] - C[blocknum][26]) >> 4 - (C[blocknum][3] + C[blocknum][19]) >> 3 - C[blocknum][25] >> 5 + C[blocknum][11] >> 2 + C[blocknum][27] >> 3 + 128);
+							pbuff[index] = VB.x31 + 128;
 						}
 						break;
 					case 4:
@@ -898,19 +902,19 @@ namespace face
 						{
 						case 0:
 						case 1: //x02
-							pbuff[index] = (Byte)(VB.x02 + (C[blocknum][24] - C[blocknum][26]) >> 4 + (C[blocknum][3] + C[blocknum][19]) >> 3 - C[blocknum][25] >> 5 + C[blocknum][11] >> 2 + C[blocknum][27] >> 3 + 128);
+							pbuff[index] = VB.x02 + 128;
 							break;
 						case 2:
 						case 3: //x12
-							pbuff[index] = (Byte)(VB.x12 - (C[blocknum][24] - C[blocknum][26]) >> 3 + (C[blocknum][3] - C[blocknum][19]) >> 3 + (C[blocknum][25] + C[blocknum][11]) >> 4 - C[blocknum][27] >> 2 + 128);
+							pbuff[index] = VB.x12 + 128;
 							break;
 						case 4:
 						case 5: //x22
-							pbuff[index] = (Byte)(VB.x22 + (C[blocknum][24] - C[blocknum][26]) >> 3 + (C[blocknum][3] - C[blocknum][19]) >> 3 - (C[blocknum][25] + C[blocknum][11]) >> 4 + C[blocknum][27] >> 2 + 128);
+							pbuff[index] = VB.x22 + 128;
 							break;
 						case 6:
 						case 7: //x32
-							pbuff[index] = (Byte)(VB.x32 - (C[blocknum][24] - C[blocknum][26]) >> 4 + (C[blocknum][3] + C[blocknum][19]) >> 3 + C[blocknum][25] >> 5 - C[blocknum][11] >> 2 - C[blocknum][27] >> 3 + 128);
+							pbuff[index] = VB.x32 + 128;
 						}
 						break;
 					case 6:
@@ -919,19 +923,19 @@ namespace face
 						{
 						case 0:
 						case 1: //x03
-							pbuff[index] = (Byte)(VB.x03 + (C[blocknum][24] + C[blocknum][26]) >> 4 - (C[blocknum][3] + C[blocknum][19]) >> 4 + (C[blocknum][25] + C[blocknum][11]) >> 3 - C[blocknum][27] >> 4 + 128);
+							pbuff[index] = VB.x03 + 128;
 							break;
 						case 2:
 						case 3: //x13
-							pbuff[index] = (Byte)(VB.x13 - (C[blocknum][24] + C[blocknum][26]) >> 3 - (C[blocknum][3] - C[blocknum][19]) >> 4 + C[blocknum][25] >> 2 - C[blocknum][11] >> 5 + C[blocknum][27] >> 3 + 128);
+							pbuff[index] = VB.x13 + 128;
 							break;
 						case 4:
 						case 5: //x23
-							pbuff[index] = (Byte)(VB.x23 + (C[blocknum][24] + C[blocknum][26]) >> 3 - (C[blocknum][3] - C[blocknum][19]) >> 4 - C[blocknum][25] >> 2 + C[blocknum][11] >> 5 - C[blocknum][27] >> 3 + 128);
+							pbuff[index] = VB.x23 + 128;
 							break;
 						case 6:
 						case 7: //x33
-							pbuff[index] = (Byte)(VB.x33 - (C[blocknum][24] + C[blocknum][26]) >> 4 - (C[blocknum][3] + C[blocknum][19]) >> 4 + (C[blocknum][25] + C[blocknum][11]) >> 3 + C[blocknum][27] >> 4 + 128);
+							pbuff[index] = VB.x33 + 128;
 						}
 						break;
 					}
@@ -939,7 +943,7 @@ namespace face
 			}
 		}
 
-		void assignValues(DCTBLOCK * C, int j, ValueBlocks& VB) {
+		void assign4m4_9Values(DCTBLOCK * C, int j, ValueBlocks& VB) {
 			ABBlocks AB;
 			assignBlock(C, AB, j);
 			VB.x00 = ((AB.A1 + AB.A3) >> 3) + ((AB.B3 + AB.B1 + AB.C11) >> 3) + ((AB.B3 + AB.B1 + AB.C11) >> 5);
@@ -960,6 +964,27 @@ namespace face
 			VB.x33 = ((AB.A1 + AB.A3) >> 3) - ((AB.B4 + AB.B1 - AB.C11) >> 3) - ((AB.B4 + AB.B1 - AB.C11) >> 5);
 		}
 
+		void assign4m4_7Values(DCTBLOCK * C, int j, ValueBlocks& VB) 
+		{
+			VB.x00 += (C[j][24] + C[j][26] + C[j][3] + C[j][19] + C[j][27]) >> 4 + (C[j][25] + C[j][1]) >> 3;
+			VB.x10 += -(C[j][24] + C[j][26]) >> 3 + (C[j][3] - C[j][19]) >> 4 - C[j][25] >> 2 + C[j][11] >> 5 - C[j][27] >> 3;
+			VB.x20 += (C[j][24] + C[j][26]) >> 3 + (C[j][3] - C[j][19]) >> 4 + C[j][25] >> 2 - C[j][11] >> 5 + C[j][27] >> 3;
+			VB.x30 += -(C[j][24] - C[j][26] + C[j][3] + C[j][19] - C[j][27]) >> 4 + (C[j][25] + C[j][1]) >> 3;
+			VB.x01 += (C[j][24] - C[j][26]) >> 4 - (C[j][3] + C[j][19]) >> 3 + C[j][25] >> 5 - C[j][11] >> 2 + C[j][27] >> 3;
+			VB.x11 += -(C[j][24] - C[j][26]) >> 3 - (C[j][3] - C[j][19]) >> 3 - (C[j][25] + C[j][11]) >> 4 + C[j][27] >> 2;
+			VB.x21 += (C[j][24] - C[j][26]) >> 3 - (C[j][3] - C[j][19]) >> 3 + (C[j][25] + C[j][11]) >> 4 - C[j][27] >> 2;
+			VB.x31 += -(C[j][24] - C[j][26]) >> 4 - (C[j][3] + C[j][19]) >> 3 - C[j][25] >> 5 + C[j][11] >> 2 + C[j][27] >> 3;
+			VB.x02 += (C[j][24] - C[j][26]) >> 4 + (C[j][3] + C[j][19]) >> 3 - C[j][25] >> 5 + C[j][11] >> 2 + C[j][27] >> 3;
+			VB.x12 += -(C[j][24] - C[j][26]) >> 3 + (C[j][3] - C[j][19]) >> 3 + (C[j][25] + C[j][11]) >> 4 - C[j][27] >> 2;
+			VB.x22 += (C[j][24] - C[j][26]) >> 3 + (C[j][3] - C[j][19]) >> 3 - (C[j][25] + C[j][11]) >> 4 + C[j][27] >> 2;
+			VB.x32 += -(C[j][24] - C[j][26]) >> 4 + (C[j][3] + C[j][19]) >> 3 + C[j][25] >> 5 - C[j][11] >> 2 - C[j][27] >> 3;
+			VB.x03 += (C[j][24] + C[j][26]) >> 4 - (C[j][3] + C[j][19]) >> 4 + (C[j][25] + C[j][11]) >> 3 - C[j][27] >> 4;
+			VB.x13 += -(C[j][24] + C[j][26]) >> 3 - (C[j][3] - C[j][19]) >> 4 + C[j][25] >> 2 - C[j][11] >> 5 + C[j][27] >> 3;
+			VB.x23 += (C[j][24] + C[j][26]) >> 3 - (C[j][3] - C[j][19]) >> 4 - C[j][25] >> 2 + C[j][11] >> 5 - C[j][27] >> 3;
+			VB.x33 += -(C[j][24] + C[j][26]) >> 4 - (C[j][3] + C[j][19]) >> 4 + (C[j][25] + C[j][11]) >> 3 + C[j][27] >> 4;
+		}
+
+
 		void assignBlock(DCTBLOCK * C, ABBlocks& AB, int i)
 		{
 			AB.A1 = C[i][0] + C[i][16];
@@ -971,6 +996,7 @@ namespace face
 			AB.B3 = C[i][8] + C[i][10];
 			AB.B4 = C[i][8] - C[i][10];
 			AB.C11 = C[i][9];
+			//printf("C00 %d, C10 %d, C01 %d, C20 %d\n", C[i][0], C[i][8], C[i][1], C[i][16]);
 		}
 
 
