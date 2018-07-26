@@ -502,6 +502,7 @@ namespace face
 			int k = 0;
 			double alpha_i = 0;
 			double alpha_j = 0;
+			double sn;
 
 			for (int i = 0; i < (int)lastnum; i++)
 			{
@@ -536,6 +537,8 @@ namespace face
 				if (MpvDecoder.MoveToNextFrame() != MDC_SUCCESS)
 					return;
 			}
+			sn = calculateS(psBuff, k);
+			std::cout << "Sn = " << sn << "\n";
 			MpvDecoder.FreeCompressedPic();
 			delete[] alphasBuff;
 			delete[] psBuff;
@@ -562,6 +565,18 @@ namespace face
 			avg_mv = mv / block_num;
 			return avg_mv;
 		};
+
+		double calculateS(double * psBuff, int length)
+		{
+			double sum = 0;
+			for (int i = 0; i < length; i++)
+			{
+				//g(p) = -p
+				//f(p) =  g(p - 1/2) = -(p - 1/2) = -p + 1/2
+				sum += -psBuff[i] + 1 / 2;
+			}
+			return sum;
+		}
 
 
 
