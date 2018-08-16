@@ -65,7 +65,7 @@ namespace face
 	private: System::Windows::Forms::PictureBox ^  pictureBox;
 	private: System::Windows::Forms::Button ^  videoExtractionButton;
 	private: System::Windows::Forms::Button ^  motionVectorButton;
-	private: System::Windows::Forms::Button ^  calculateButton;
+	private: System::Windows::Forms::Button ^  anomalyDetectionButton;
 	private: System::Windows::Forms::OpenFileDialog ^  openFileDialog;
 	private: System::Windows::Forms::RichTextBox ^  richTextBox;
 
@@ -109,17 +109,17 @@ namespace face
 			this->motionVectorButton->Text = L"Motion vector";
 			this->motionVectorButton->Click += gcnew System::EventHandler(this, &Form1::motionVectorButton_click);
 
-			this->calculateButton = (gcnew System::Windows::Forms::Button());
-			this->calculateButton->Location = System::Drawing::Point(100, 600);
-			this->calculateButton->Size = System::Drawing::Size(271, 69);
-			this->calculateButton->TabIndex = 3;
-			this->calculateButton->Text = L"Calculate alpha, p and S";
-			this->calculateButton->Click += gcnew System::EventHandler(this, &Form1::calculateButton_click);
+			this->anomalyDetectionButton = (gcnew System::Windows::Forms::Button());
+			this->anomalyDetectionButton->Location = System::Drawing::Point(100, 600);
+			this->anomalyDetectionButton->Size = System::Drawing::Size(271, 69);
+			this->anomalyDetectionButton->TabIndex = 3;
+			this->anomalyDetectionButton->Text = L"Anomaly Detection";
+			this->anomalyDetectionButton->Click += gcnew System::EventHandler(this, &Form1::anomalyDetectionButton_click);
 
 			this->Controls->Add(this->pictureBox);
 			this->Controls->Add(this->videoExtractionButton);
 			this->Controls->Add(this->motionVectorButton);
-			this->Controls->Add(this->calculateButton);
+			this->Controls->Add(this->anomalyDetectionButton);
 			this->Controls->Add(this->richTextBox);
 
 			this->AutoScaleBaseSize = System::Drawing::Size(8, 19);
@@ -321,107 +321,6 @@ namespace face
 					Avx = sxk / Num_Inter;
 					Avy = syk / Num_Inter;
 
-					////////////////////
-
-					//后面都是用motion vector检测特写镜头
-					/*for (int k = 0; k < Num_Inter; k++)
-					{
-					s_nu = s_nu + (xk1Buff[k] - Avx1) * (xkBuff[k] - Avx) + (yk1Buff[k] - Avy1) * (ykBuff[k] - Avy);
-					s_de = s_de + (xkBuff[k] - Avx) *(xkBuff[k] - Avx) + (ykBuff[k] - Avy) * (ykBuff[k] - Avy);
-					}
-
-					s = s_nu / s_de;*/
-
-					//MpvDecoder.GetCurFrameNum(&crt_num);
-
-
-					//if (s>1)
-					//{
-					//	zoomin_count++;
-
-					//	if (zoomin_count == 1)
-					//	{
-					//		smax = s;
-					//		smin = s;
-					//	}
-
-					//	if (s>smax) smax = s;
-					//	if (s<smin) smin = s;
-
-					//	//  this->richTextBox1->AppendText("Zoom in is detected at the ");
-					//	this->richTextBox1->AppendText("Zoom in is detected: s=");
-					//	this->richTextBox1->AppendText(s.ToString());
-					//	this->richTextBox1->AppendText("   at");
-
-					//	this->richTextBox1->AppendText(crt_num.ToString());
-					//	this->richTextBox1->AppendText(" Frame\n");
-					//	this->richTextBox1->Update();
-					//}
-
-					//if (s == 1)
-					//{
-					//	zoomin_count = 0;
-
-					//	smax = 0;
-					//	smin = 0;
-
-					//	this->richTextBox1->AppendText("No Zoom is detected at the ");
-					//	this->richTextBox1->AppendText(crt_num.ToString());
-					//	this->richTextBox1->AppendText(" Frame\n");
-					//	this->richTextBox1->Update();
-					//}
-
-
-					//if (s<1)
-					//{
-					//	zoomin_count = 0;
-
-					//	smax = 0;
-					//	smin = 0;
-
-					//	this->richTextBox1->AppendText("Zoom Out is detected at the ");
-					//	this->richTextBox1->AppendText(crt_num.ToString());
-					//	this->richTextBox1->AppendText(" Frame\n");
-					//	this->richTextBox1->Update();
-					//}
-
-					//zincountBuff[Pframe_num] = zoomin_count;
-					//zinframeBuff[Pframe_num] = crt_num;
-					//zinsBuff[Pframe_num] = s;
-					//zinsmaxBuff[Pframe_num] = smax;
-					//zinsminBuff[Pframe_num] = smin;
-
-
-					////  if(zincountBuff[Pframe_num-1]>=1 && zincountBuff[Pframe_num] == 0 && zinsBuff[Pframe_num-1]>1.001)
-					//if (zincountBuff[Pframe_num - 1] == 1 && zincountBuff[Pframe_num] == 0 && zinsBuff[Pframe_num - 1]>1.00109)
-					//{
-					//	cframeBuff[closeup_count] = zinframeBuff[Pframe_num - 1];
-
-					//	closeup_count++;
-
-					//	/*this->richTextBox1->AppendText("\nClose-up is detected at the ");
-					//	this->richTextBox1->AppendText(zinframeBuff[Pframe_num - 1].ToString());
-					//	this->richTextBox1->AppendText(" Frame\n\n");
-					//	this->richTextBox1->Update();*/
-
-					//}
-
-					//if (zincountBuff[Pframe_num - 1]>1 && zincountBuff[Pframe_num] == 0 && ((zinsmaxBuff[Pframe_num - 1] - 1) / (zinsminBuff[Pframe_num - 1] - 1))>4)
-					//{
-					//	cframeBuff[closeup_count] = zinframeBuff[Pframe_num - 1];
-
-					//	closeup_count++;
-
-					//	/*this->richTextBox1->AppendText("\nClose-up is detected at the ");
-					//	this->richTextBox1->AppendText(zinframeBuff[Pframe_num - 1].ToString());
-					//	this->richTextBox1->AppendText(" Frame\n\n");
-					//	this->richTextBox1->Update();*/
-
-					//}
-
-					//Pframe_num++;
-
-
 					free(xk1Buff);
 					free(yk1Buff);
 					free(xkBuff);
@@ -450,12 +349,12 @@ namespace face
 		}
 
 	////////////////////////////
-	// calculate alpha and p
+	// detect anomaly
 	///////////////////////////
 
 
 	private:
-		System::Void calculateButton_click(System::Object ^  sender, System::EventArgs ^  e)
+		System::Void anomalyDetectionButton_click(System::Object ^  sender, System::EventArgs ^  e)
 		{
 			const HEADERDATA *pMpvHeaderData;
 			char pFileName[200];
@@ -542,15 +441,21 @@ namespace face
 					srand(time(NULL));
 					double random = rand() / double(RAND_MAX);
 					psBuff[k] = (set1 + random * set2) / (k + 1);
+					/*
 					std::cout << "alphasBuff[" << k << "] = " << alphasBuff[k]
 						<< "      psBuff[" << k << "] = " << psBuff[k] << "\n";
+					*/
 					k++;
 				}
 				if (MpvDecoder.MoveToNextFrame() != MDC_SUCCESS)
 					return;
 			}
-			sn = calculateS(psBuff, k);
-			std::cout << "Sn = " << sn << "\n";
+			//sn = calculateS(psBuff, k);
+			//std::cout << "Sn = " << sn << "\n";
+			for (int i = 0; i < (int)lastnum; i++)
+			{
+				alarm(psBuff, i);
+			}
 			MpvDecoder.FreeCompressedPic();
 			delete[] alphasBuff;
 			delete[] psBuff;
@@ -586,6 +491,31 @@ namespace face
 				//g(p) = -p
 				//f(p) =  g(p - 1/2) = -(p - 1/2) = -p + 1/2
 				sum += -psBuff[i] + 1 / 2;
+			}
+			return sum;
+		}
+
+		double alarm(double * psBuff, int n)
+		{
+			double sum = 0;
+			int sli_width = 2;
+
+			//start from a positive num
+			if (n - sli_width + 1 >= 0)
+			{
+				for (int i = n - sli_width + 1; i <= n; i++)
+				{
+					//g(p) = -p
+					//f(p) =  g(p - 1/2) = -(p - 1/2) = -p + 1/2
+					sum += -psBuff[i] + 1 / 2;
+				}
+
+			}
+
+			double significance_level = 0.1; //to be adjusted
+			if (fabs(sum) >= sqrt((double)sli_width / (12 * significance_level)))
+			{
+				std::cout << "Anomaly has occured! n = " << n << "\n";
 			}
 			return sum;
 		}
