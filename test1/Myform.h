@@ -65,6 +65,7 @@ namespace face
 	private: System::Windows::Forms::PictureBox ^  pictureBox;
 	private: System::Windows::Forms::Button ^  videoExtractionButton;
 	private: System::Windows::Forms::Button ^  motionVectorButton;
+	private: System::Windows::Forms::Button ^  calculateButton;
 	private: System::Windows::Forms::OpenFileDialog ^  openFileDialog;
 	private: System::Windows::Forms::RichTextBox ^  richTextBox;
 
@@ -95,28 +96,39 @@ namespace face
 
 			//button
 			this->videoExtractionButton = (gcnew System::Windows::Forms::Button());
-			this->videoExtractionButton->Location = System::Drawing::Point(600, 600);
+			this->videoExtractionButton->Location = System::Drawing::Point(700, 600);
 			this->videoExtractionButton->Size = System::Drawing::Size(271, 69);
 			this->videoExtractionButton->TabIndex = 3;
 			this->videoExtractionButton->Text = L"Extract video";
 			this->videoExtractionButton->Click += gcnew System::EventHandler(this, &Form1::videoExtractionButton_click);
 
 			this->motionVectorButton = (gcnew System::Windows::Forms::Button());
-			this->motionVectorButton->Location = System::Drawing::Point(300, 600);
+			this->motionVectorButton->Location = System::Drawing::Point(400, 600);
 			this->motionVectorButton->Size = System::Drawing::Size(271, 69);
 			this->motionVectorButton->TabIndex = 3;
 			this->motionVectorButton->Text = L"Motion vector";
-			this->motionVectorButton->Click += gcnew System::EventHandler(this, &Form1::motionVectorpsButton_click);
+			this->motionVectorButton->Click += gcnew System::EventHandler(this, &Form1::motionVectorButton_click);
 
-			//this->Controls->Add(this->pictureBox1);
+			this->calculateButton = (gcnew System::Windows::Forms::Button());
+			this->calculateButton->Location = System::Drawing::Point(100, 600);
+			this->calculateButton->Size = System::Drawing::Size(271, 69);
+			this->calculateButton->TabIndex = 3;
+			this->calculateButton->Text = L"Calculate alpha, p and S";
+			this->calculateButton->Click += gcnew System::EventHandler(this, &Form1::calculateButton_click);
+
 			this->Controls->Add(this->pictureBox);
 			this->Controls->Add(this->videoExtractionButton);
 			this->Controls->Add(this->motionVectorButton);
+			this->Controls->Add(this->calculateButton);
 			this->Controls->Add(this->richTextBox);
 
 			this->AutoScaleBaseSize = System::Drawing::Size(8, 19);
 			this->ClientSize = System::Drawing::Size(1104, 857);
 		}
+
+		////////////////////////////
+		// motion vector
+		///////////////////////////
 
 
 	private:
@@ -438,12 +450,12 @@ namespace face
 		}
 
 	////////////////////////////
-	// MOTION VECTOR
+	// calculate alpha and p
 	///////////////////////////
 
 
 	private:
-		System::Void motionVectorpsButton_click(System::Object ^  sender, System::EventArgs ^  e)
+		System::Void calculateButton_click(System::Object ^  sender, System::EventArgs ^  e)
 		{
 			const HEADERDATA *pMpvHeaderData;
 			char pFileName[200];
